@@ -5,12 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.arunqi</groupId>
-    <artifactId>mmall</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>dependencies-bom</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <modules>
-        <module>mmall-common</module>
-    </modules>
+    <packaging>pom</packaging>
 
+    <properties>
+    </properties>
+
+    <!-- 版本管理 -->
+    <dependencyManagement>
+        <dependencies>
+
+        </dependencies>
+    </dependencyManagement>
 
 </project>
