@@ -246,5 +246,10 @@
             <property name="exceptionVariableName" value="expected"/>
         </module>
         <module name="CommentsIndentation"/>
+
+        <!-- 扩展 -->
+        <module name="ConstantName"/>
+        <module name="LocalFinalVariableName"/>
+        <module name="PackageAnnotation"/>
     </module>
 </module>
