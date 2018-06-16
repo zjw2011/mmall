@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:order.properties" />
+
+    <dubbo:application name="${dubbo.application}" />
+
+    <dubbo:registry address="${dubbo.registry.address}" />
+
+    <dubbo:annotation package="com.arunqi" />
+
+    <!-- kryo实现序列化 -->
+    <dubbo:protocol name="dubbo" serialization="kryo" optimizer="com.arunqi.mmall.order.serial.SerializationOptimizerImpl" />
+
+    <dubbo:protocol name="rest" server="${dubbo.rest.server}" port="${dubbo.rest.port}" contextpath="${dubbo.rest.contextpath}" threads="${dubbo.rest.threads}" accepts="${dubbo.rest.accepts}" />
+
+    <!--<bean class="com.arunqi.mmall.order.service.TestService" id="testService" />-->
+
+    <!--<dubbo:service interface="com.arunqi.mmall.order.facade.TestFacade" ref="testService" protocol="rest,dubbo" />-->
+
+</beans>

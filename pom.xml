@@ -14,6 +14,13 @@
         <module>mmall-common</module>
         <module>mmall-test</module>
         <module>mmall-orders</module>
+        <module>mmall-order-facade</module>
+        <module>mmall-order-service</module>
+        <module>mmall-openapi</module>
+        <module>mmall-coupon-facade</module>
+        <module>mmall-coupon-service</module>
+        <module>mmall-base-service</module>
+        <module>mmall-base-facade</module>
     </modules>
 
     <properties>
@@ -44,19 +51,24 @@
 
     <dependencyManagement>
         <dependencies>
-            <!--<dependency>-->
-                <!--<groupId>com.arunqi</groupId>-->
-                <!--<artifactId>mmall-dependencies-bom</artifactId>-->
-                <!--<version>0.0.1-SNAPSHOT</version>-->
-                <!--<type>pom</type>-->
-                <!--<scope>import</scope>-->
-            <!--</dependency>-->
+            <dependency>
+                <groupId>com.arunqi</groupId>
+                <artifactId>mmall-dependencies-bom</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>dubbo-dependencies-bom</artifactId>
                 <version>2.6.2</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>dubbo</artifactId>
+                <version>2.6.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

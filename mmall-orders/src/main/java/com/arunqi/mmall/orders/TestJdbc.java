@@ -36,8 +36,8 @@ public class TestJdbc {
                 new ClassPathXmlApplicationContext("classpath:spring-context.xml");
         xmlApplicationContext.start();
         BaseJdbcDao baseJdbcDao = (BaseJdbcDao) xmlApplicationContext.getBean("baseJdbcDao");
-        List<JSONObject> lists = baseJdbcDao.queryForJsonList("select public_key publicKey from app");
-        logger.debug("lists"+ lists);
+        List<JSONObject> lists = baseJdbcDao.queryForJsonList("select public_key from app");
+        logger.info("lists"+ lists);
 
         Map<String, String> map = new HashMap<>();
         Map<String, String> revertMap = new HashMap<>();
@@ -48,6 +48,8 @@ public class TestJdbc {
             List<? extends V> values = Collections.unmodifiableList(entry.getValue());
             result.put(entry.getKey(), (List<V>) values);
         }*/
-        System.in.read();
+        TimeUnit.SECONDS.sleep(60);
+        xmlApplicationContext.close();
+        //System.in.read();
     }
 }

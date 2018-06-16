@@ -32,6 +32,7 @@
         <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
         <property name="validationTimeout" value="10000" />
         <property name="connectionTestQuery" value="${jdbc.testSql}" />
+        <!--<property name="connectionInitSql" value="${jdbc.testSql}" />-->
 
         <property name="dataSourceProperties">
             <props>
@@ -54,5 +55,7 @@
     <bean id="baseJdbcDao" class="com.arunqi.mmall.common.dao.BaseJdbcDao">
         <constructor-arg index="0" ref="dataSource" />
     </bean>
+
+    <bean class="com.arunqi.mmall.orders.TestListener" destroy-method="close"></bean>
 
 </beans>
