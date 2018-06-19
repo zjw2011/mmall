@@ -1,4 +1,4 @@
-package com.arunqi.mmall.order.facade;
+package com.arunqi.mmall.coupon.facade;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,8 +12,8 @@ import javax.ws.rs.Path;
 //@Path("/")
 //@Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 //@Produces({ContentType.APPLICATION_JSON_UTF_8, ContentType.TEXT_XML_UTF_8})
-public interface TestFacade {
-//    @GET
-//    @Path("/hello")
+public interface TestCouponFacade {
+    //@GET
+    //@Path("/hello")
     String hello();
 }

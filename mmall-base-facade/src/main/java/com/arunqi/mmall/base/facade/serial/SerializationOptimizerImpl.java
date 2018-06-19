@@ -1,4 +1,4 @@
-package com.arunqi.mmall.order.serial;
+package com.arunqi.mmall.base.facade.serial;
 
 import java.util.Collection;
 import java.util.LinkedList;

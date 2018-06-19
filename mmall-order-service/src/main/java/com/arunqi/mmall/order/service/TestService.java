@@ -3,7 +3,9 @@ package com.arunqi.mmall.order.service;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.dubbo.rpc.RpcException;
 import com.arunqi.mmall.order.facade.TestFacade;
 
 /**
@@ -13,13 +15,13 @@ import com.arunqi.mmall.order.facade.TestFacade;
  * 2018/6/16 下午8:55
  */
 @Path("/")
-//@Service
-@Service(interfaceClass = com.arunqi.mmall.order.facade.TestFacade.class, protocol = {"rest", "dubbo"})
+@Service("testService")
 public class TestService implements TestFacade {
-    @Override
     @GET
     @Path("/hello")
     public String hello() {
-        return "hello";
+        throw new RpcException("RPC错误");
+        //return "hello from order";
     }
+
 }

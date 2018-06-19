@@ -6,19 +6,14 @@
 
     <context:property-placeholder ignore-unresolvable="true" location="classpath:order.properties" />
 
-    <dubbo:application name="${dubbo.application}" />
+    <dubbo:application name="${dubbo.application}" owner="programmer" organization="dubbo" />
 
     <dubbo:registry address="${dubbo.registry.address}" />
 
-    <dubbo:annotation package="com.arunqi" />
-
     <!-- kryo实现序列化 -->
-    <dubbo:protocol name="dubbo" serialization="kryo" optimizer="com.arunqi.mmall.order.serial.SerializationOptimizerImpl" />
+    <dubbo:protocol name="dubbo" port="20882" serialization="kryo" optimizer="com.arunqi.mmall.order.serial.SerializationOptimizerImpl" />
 
-    <dubbo:protocol name="rest" server="${dubbo.rest.server}" port="${dubbo.rest.port}" contextpath="${dubbo.rest.contextpath}" threads="${dubbo.rest.threads}" accepts="${dubbo.rest.accepts}" />
-
-    <!--<bean class="com.arunqi.mmall.order.service.TestService" id="testService" />-->
-
-    <!--<dubbo:service interface="com.arunqi.mmall.order.facade.TestFacade" ref="testService" protocol="rest,dubbo" />-->
+    <!-- 以下是 producer 的接口 -->
+    <dubbo:service interface="com.arunqi.mmall.order.facade.TestFacade" ref="testService" protocol="dubbo" />
 
 </beans>
