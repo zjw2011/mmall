@@ -31,6 +31,12 @@
     <logger name="com.zaxxer.hikari" level="DEBUG"/>
     <logger name="com.alibaba.dubbo" level="DEBUG"/>
 
+    <!--显示日志-->
+    <!--<logger name="org.springframework.jdbc.core" additivity="false" level="DEBUG" >-->
+        <!--<appender-ref ref="CONSOLE" />-->
+        <!--<appender-ref ref="FILE" />-->
+    <!--</logger>-->
+
     <root level="DEBUG">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />

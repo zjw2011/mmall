@@ -1,0 +1,5 @@
+2018-06-23 22:32:35,903 INFO [com.alibaba.dubbo.common.logger.LoggerFactory] - using logger: com.alibaba.dubbo.common.logger.log4j.Log4jLoggerAdapter
+2018-06-23 22:32:36,102 INFO [com.alibaba.dubbo.container.Main] -  [DUBBO] Use container type([spring]) to run dubbo serivce., dubbo version: 2.6.2, current host: 10.8.0.50
+2018-06-23 22:32:37,106 INFO [com.alibaba.dubbo.container.Main] -  [DUBBO] Dubbo SpringContainer started!, dubbo version: 2.6.2, current host: 10.8.0.50
+2018-06-23 22:32:45,461 INFO [com.alibaba.dubbo.common.logger.LoggerFactory] - using logger: com.alibaba.dubbo.common.logger.log4j.Log4jLoggerAdapter
+2018-06-23 22:32:52,115 INFO [com.alibaba.dubbo.container.Main] -  [DUBBO] Use container type([spring]) to run dubbo serivce., dubbo version: 2.6.2, current host: 10.8.0.50
