@@ -5,18 +5,15 @@
        xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-    <context:property-placeholder ignore-unresolvable="true" location="classpath:order.properties" />
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:leaf.properties" />
 
     <dubbo:application name="${dubbo.application}" owner="programmer" organization="dubbo" />
 
     <dubbo:registry address="${dubbo.registry.address}" />
 
     <!-- kryo实现序列化 -->
-    <dubbo:protocol name="dubbo" port="20882" serialization="kryo" optimizer="com.arunqi.mmall.server.base.serial.SerializationOptimizerImpl" />
+    <dubbo:protocol name="dubbo" port="20883" serialization="kryo" optimizer="com.arunqi.mmall.server.base.serial.SerializationOptimizerImpl" />
 
     <!-- 以下是 producer 的接口 -->
-    <dubbo:service interface="com.arunqi.mmall.facade.order.service.OrderService" ref="orderService" protocol="dubbo" />
-
-    <!-- 以下是 consumer 的接口 -->
-    <dubbo:reference interface="com.arunqi.mmall.facade.leaf.service.LeafService" check="false" id="leafService" protocol="dubbo" />
+    <dubbo:service interface="com.arunqi.mmall.facade.leaf.service.LeafService" ref="leafService" protocol="dubbo" />
 </beans>

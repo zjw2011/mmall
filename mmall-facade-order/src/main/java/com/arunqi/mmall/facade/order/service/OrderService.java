@@ -18,5 +18,6 @@ public interface OrderService {
      */
     DubboResponse doOrder(DubboRequest request);
     JSONObject doOrder(JSONObject request);
-
+    void deleteOrder(Long id);
+    String getOrderId(String bizName) throws InterruptedException;
 }

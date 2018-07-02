@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.arunqi</groupId>
-    <artifactId>mmall-server-order</artifactId>
+    <artifactId>mmall-server-id</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <dependencies>
@@ -19,18 +19,6 @@
             <artifactId>mmall-server-base</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.arunqi</groupId>
-            <artifactId>mmall-facade-order</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.arunqi</groupId>
-            <artifactId>mmall-facade-leaf</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
-
 
 </project>

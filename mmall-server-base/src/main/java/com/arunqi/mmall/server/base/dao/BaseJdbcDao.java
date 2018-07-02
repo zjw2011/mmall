@@ -1,6 +1,5 @@
 package com.arunqi.mmall.server.base.dao;
 
-import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.arunqi.mmall.common.dao.JsonRowMapper;
 import java.sql.PreparedStatement;
@@ -10,6 +9,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -17,15 +17,21 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
- * desc.
+ * id 在数据库里面是long.
  * @author jiawei zhang
  * @since
  */
 public abstract class BaseJdbcDao {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseJdbcDao.class);
 
     private static final ExecutorService COUNT_EXCUTOR = Executors.newCachedThreadPool();
 
@@ -34,6 +40,15 @@ public abstract class BaseJdbcDao {
 
     //启动时间
     private Date startTime;
+
+    /**
+     *  是否包含创建时间.
+     */
+    private boolean includCreatetime = true;
+    /**
+     *  是否包含更新时间.
+     */
+    private boolean includUpdatetime = true;
 
     /**
      * 初始化JDBC调用模板.
@@ -57,6 +72,54 @@ public abstract class BaseJdbcDao {
         return startTime;
     }
 
+    private String buildUpdateCondition(final JSONObject conditions,
+                                        final List<Object> queryConditions) {
+        return buildCondition(conditions, queryConditions, false);
+    }
+
+    private String buildCondition(final JSONObject conditions, final List<Object> queryConditions) {
+        return buildCondition(conditions, queryConditions, true);
+    }
+
+    private String buildCondition(final JSONObject conditions,
+                                  final List<Object> queryConditions, final boolean query) {
+        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sbOrderBy = new StringBuilder();
+        for (Map.Entry<String, Object> entry: conditions.entrySet()) {
+            //如果值为空，则不过滤
+            if (ObjectUtils.isEmpty(entry.getValue())) {
+                continue;
+            }
+            final String key = entry.getKey();
+            if (query && key.charAt(0) == '+') {
+                sbOrderBy.append(" order by ").append(key.substring(1))
+                        .append(" ASC,");
+                continue;
+            }
+
+            if (query && key.charAt(0) == '-') {
+                sbOrderBy.append(" order by ").append(key.substring(1))
+                        .append(" DESC,");
+                continue;
+            }
+
+            final int posGt = key.indexOf(">");
+            final int posLt = key.indexOf("<");
+            if (posGt > 0 || posLt > 0) {
+                queryConditions.add(entry.getValue());
+                sb.append(" and ").append(key).append("?");
+                continue;
+            }
+            queryConditions.add(entry.getValue());
+            sb.append(" and ").append(key).append("=?");
+        }
+        if (query && sbOrderBy.length() > 0) {
+            sbOrderBy.deleteCharAt(sbOrderBy.length() - 1);
+            sb.append(sbOrderBy.toString());
+        }
+        return sb.toString();
+    }
+
     public Date getCurrentTime() {
         return this.getJdbcTemplate().queryForObject("SELECT CURRENT_TIMESTAMP", Date.class);
     }
@@ -69,7 +132,102 @@ public abstract class BaseJdbcDao {
      * @return List JSON列表
      */
     public List<JSONObject> queryForJsonList(String sql, Object... args) {
-        return this.getJdbcTemplate().query(sql, JSON_ROW_MAPPER, args);
+        LOGGER.debug("args:" + ObjectUtils.nullSafeToString(args));
+        final List<JSONObject> result = this.getJdbcTemplate().query(sql, JSON_ROW_MAPPER, args);
+        LOGGER.debug("result:", result);
+        return result;
+    }
+
+    /**
+     * 按照条件查询.
+     * @param conditions 条件
+     * @param sqlQuery sql查询语句
+     * @return
+     */
+    public List<JSONObject> queryForJsonList(final JSONObject conditions,
+                                             final String sqlQuery) {
+        Assert.notNull(conditions, "条件不能为空");
+        final List<Object> queryConditions = new ArrayList<>();
+        final StringBuilder sb = new StringBuilder(sqlQuery);
+        sb.append(buildCondition(conditions, queryConditions));
+        final List<JSONObject> result = queryForJsonList(sb.toString(), queryConditions.toArray());
+        return result;
+    }
+
+    /**
+     * 查询文本.
+     *
+     * @param sql SQL语句
+     * @param args 参数
+     * @return String 文本
+     */
+    public String queryForString(String sql, Object... args) {
+        LOGGER.debug("args:" + ObjectUtils.nullSafeToString(args));
+        List<String> dataList = this.getJdbcTemplate().queryForList(sql, args, String.class);
+        if (dataList == null || dataList.size() < 1) {
+            return null;
+        }
+        final String result = dataList.get(0);
+        LOGGER.debug("result:", result);
+        return result;
+    }
+
+    /**
+     * 查询文本.
+     *
+     * @param sql SQL语句
+     * @param args 参数
+     * @return String 文本
+     */
+    public List<String> queryForStringList(String sql, Object... args) {
+        LOGGER.debug("args:", ObjectUtils.nullSafeToString(args));
+        final List<String> result = this.getJdbcTemplate().queryForList(sql, args, String.class);
+        LOGGER.debug("result:", result);
+        return result;
+    }
+
+    /**
+     * 按照条件查询.
+     * @param conditions 条件
+     * @param sqlQuery sql查询语句
+     * @return
+     */
+    public List<String> queryForStringList(final JSONObject conditions,
+                                           final String sqlQuery) {
+        Assert.notNull(conditions, "条件不能为空");
+        final List<Object> queryConditions = new ArrayList<>();
+        final StringBuilder sb = new StringBuilder(sqlQuery);
+        sb.append(buildCondition(conditions, queryConditions));
+        return queryForStringList(sb.toString(), queryConditions.toArray());
+    }
+
+    /**
+     * 查询数字列表.
+     *
+     * @param sql SQL语句
+     * @param args 参数
+     * @return String 文本
+     */
+    public List<Long> queryForLongList(String sql, Object... args) {
+        LOGGER.debug("args:" + ObjectUtils.nullSafeToString(args));
+        List<Long> result = this.getJdbcTemplate().queryForList(sql, args, Long.class);
+        LOGGER.debug("result:", result);
+        return result;
+    }
+
+    /**
+     * 按照条件查询.
+     * @param conditions 条件
+     * @param sqlQuery sql查询语句
+     * @return
+     */
+    public List<Long> queryForLongList(final JSONObject conditions,
+                                           final String sqlQuery) {
+        Assert.notNull(conditions, "条件不能为空");
+        final List<Object> queryConditions = new ArrayList<>();
+        final StringBuilder sb = new StringBuilder(sqlQuery);
+        sb.append(buildCondition(conditions, queryConditions));
+        return queryForLongList(sb.toString(), queryConditions.toArray());
     }
 
     /**
@@ -88,19 +246,16 @@ public abstract class BaseJdbcDao {
     }
 
     /**
-     * 查询文本.
+     * 通过ID查询.
      *
-     * @param sql SQL语句
-     * @param args 参数
-     * @return String 文本
+     * @return
      */
-    public String queryForString(String sql, Object... args) {
-        List<String> dataList = this.getJdbcTemplate().queryForList(sql, args, String.class);
-        if (dataList == null || dataList.size() < 1) {
-            return null;
-        }
-        return dataList.get(0);
+    public JSONObject queryById(final String sqlQueryById,
+                                final Long id) {
+        Assert.isTrue(id != null, "id不能为空");
+        return queryForJsonObject(sqlQueryById, id);
     }
+
 
     /**
      * 查询文本.
@@ -109,10 +264,10 @@ public abstract class BaseJdbcDao {
      * @param args 参数
      * @return String 文本
      */
-    public Page queryForPage(String sql, int pageNum, int pageSize, Object... args) {
+    public Page queryForPage(String sql, int pageNo, int pageSize, Object... args) {
 
         final Page page = new Page();
-        page.setCurrNum(pageNum);
+        page.setCurrNum(pageNo);
         page.setPreSize(pageSize);
         page.setCount(0);
         //可以考虑并发 查询和查询总数并行
@@ -145,6 +300,24 @@ public abstract class BaseJdbcDao {
         return queryForPage(sql, 1, 10, args);
     }
 
+    /**
+     * 分页查询.
+     *
+     * @return
+     */
+    public Page queryForPage(final JSONObject conditions,
+                            final int pageNo,
+                            final int pageSize,
+                            final String sqlQuery) {
+        Assert.notNull(conditions, "条件不能为空");
+        Assert.isTrue(pageNo > 0, "参数[页码]不正确");
+        Assert.isTrue(pageSize > 0, "参数[页大小]不正确");
+
+        final List<Object> queryConditions = new ArrayList<>();
+        final StringBuilder sb = new StringBuilder(sqlQuery);
+        sb.append(buildCondition(conditions, queryConditions));
+        return queryForPage(sb.toString(), pageNo - 1, pageSize, queryConditions.toArray());
+    }
 
     /**
      * 专门为?的自定义sql获取总数.
@@ -159,6 +332,7 @@ public abstract class BaseJdbcDao {
                 final String e = sql.substring(sql.indexOf("from", 8));
                 final String c = "select count(*) " + e;
                 final long cnt = getJdbcTemplate().queryForObject(c, args, Long.class);
+                LOGGER.debug("count:", cnt);
                 return cnt;
             }
         });
@@ -190,44 +364,17 @@ public abstract class BaseJdbcDao {
     }
 
     /**
-     * 适应SQL列名.
-     *
-     * @param c 原列名
-     * @return String 调整后列名
-     */
-    public static String co(String c) {
-        if (StringUtils.isBlank(c)) {
-            return null;
-        }
-        return c.trim().toUpperCase();
-    }
-
-    /**
-     * 适应SQL参数.
-     *
-     * @param v 参数
-     * @return String 调整后参数
-     */
-    public static String vo(String v) {
-        if (StringUtils.isBlank(v)) {
-            return null;
-        }
-        return v.trim().replaceAll("'", "''");
-    }
-
-    /**
      * 单表INSERT方法.
      *
      * @param tableName 表名
      * @param data JSONObject对象
      */
     protected int insert(String tableName, JSONObject data) {
+        Assert.isTrue((data != null && data.size() > 0), "数据不能为空");
 
-        if (data.size() <= 0) {
-            return 0;
-        }
+        LOGGER.debug("data:" + data.toJSONString());
 
-        StringBuffer sql = new StringBuffer();
+        StringBuilder sql = new StringBuilder();
         sql.append(" INSERT INTO ");
         sql.append(tableName + " ( ");
 
@@ -241,12 +388,25 @@ public abstract class BaseJdbcDao {
         }
 
         sql.delete(sql.length() - 1, sql.length());
-        sql.append(" ) VALUES ( ");
+        if (includCreatetime) {
+            sql.append(",createtime");
+        }
+        if (includUpdatetime) {
+            sql.append(",updatetime");
+        }
+        sql.append(") VALUES ( ");
         for (int i = 0; i < set.size(); i++) {
             sql.append("?,");
         }
 
         sql.delete(sql.length() - 1, sql.length());
+        if (includCreatetime) {
+            sql.append(",CURRENT_TIMESTAMP()");
+        }
+        if (includUpdatetime) {
+            sql.append(",CURRENT_TIMESTAMP()");
+        }
+
         sql.append(" ) ");
 
         return this.getJdbcTemplate().update(sql.toString(), sqlArgs.toArray());
@@ -261,13 +421,11 @@ public abstract class BaseJdbcDao {
      */
     protected void insertBatch(String tableName, final List<LinkedHashMap<String, Object>> list) {
 
-        if (list.size() <= 0) {
-            return;
-        }
+        Assert.isTrue((list != null && list.size() > 0), "数据不能为空");
 
         LinkedHashMap<String, Object> linkedHashMap = list.get(0);
 
-        StringBuffer sql = new StringBuffer();
+        StringBuilder sql = new StringBuilder();
         sql.append(" INSERT INTO ");
         sql.append(tableName + " ( ");
 
@@ -279,6 +437,12 @@ public abstract class BaseJdbcDao {
         }
 
         sql.delete(sql.length() - 1, sql.length());
+        if (includCreatetime) {
+            sql.append(",createtime");
+        }
+        if (includUpdatetime) {
+            sql.append(",updatetime");
+        }
 
         sql.append(" ) VALUES ( ");
         for (int i = 0; i < linkedHashMap.size(); i++) {
@@ -286,6 +450,12 @@ public abstract class BaseJdbcDao {
         }
 
         sql.delete(sql.length() - 1, sql.length());
+        if (includCreatetime) {
+            sql.append(",CURRENT_TIMESTAMP()");
+        }
+        if (includUpdatetime) {
+            sql.append(",CURRENT_TIMESTAMP()");
+        }
         sql.append(" ) ");
 
         this.getJdbcTemplate().batchUpdate(sql.toString(), new BatchPreparedStatementSetter() {
@@ -304,4 +474,72 @@ public abstract class BaseJdbcDao {
         });
     }
 
+    /**
+     * desc.
+     * @param tableName 表名
+     * @param data 数据
+     * @param conditions 条件
+     * @return
+     */
+    protected int update(final String tableName,
+                         final JSONObject data,
+                         final JSONObject conditions) {
+        Assert.hasText(tableName, "表名不能为空");
+        Assert.isTrue((data != null && data.size() > 0), "数据不能为空");
+
+        LOGGER.debug("data:" + data.toJSONString());
+        LOGGER.debug("conditions:" + conditions.toJSONString());
+
+        final List<Object> objectList = new ArrayList<>();
+        final StringBuilder sb = new StringBuilder("update ");
+        sb.append(tableName);
+        sb.append(" set ");
+        for (Map.Entry<String, Object> entry: data.entrySet()) {
+            //如果值为空，则不过滤
+            if (ObjectUtils.isEmpty(entry.getValue())) {
+                continue;
+            }
+            sb.append(entry.getKey()).append("=?,");
+            objectList.add(entry.getValue());
+        }
+        if (includUpdatetime) {
+            sb.append("updatetime=CURRENT_TIMESTAMP()");
+        } else {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+
+        if (conditions == null) {
+            return this.getJdbcTemplate().update(sb.toString(), objectList.toArray());
+        }
+
+        sb.append(" where 1=1 ");
+        sb.append(buildUpdateCondition(conditions, objectList));
+        /*
+        for (Map.Entry<String, Object> entry: conditions.entrySet()) {
+            //如果值为空，则不过滤
+            if (ObjectUtils.isEmpty(entry.getValue())) {
+                continue;
+            }
+            objectList.add(entry.getValue());
+            sb.append(" and ").append(entry.getKey()).append("=?");
+        }*/
+
+        return this.getJdbcTemplate().update(sb.toString(), objectList.toArray());
+    }
+
+    public boolean isIncludCreatetime() {
+        return includCreatetime;
+    }
+
+    public void setIncludCreatetime(boolean includCreatetime) {
+        this.includCreatetime = includCreatetime;
+    }
+
+    public boolean isIncludUpdatetime() {
+        return includUpdatetime;
+    }
+
+    public void setIncludUpdatetime(boolean includUpdatetime) {
+        this.includUpdatetime = includUpdatetime;
+    }
 }

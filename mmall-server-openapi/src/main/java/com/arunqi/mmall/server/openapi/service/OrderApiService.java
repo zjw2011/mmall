@@ -10,5 +10,6 @@ import javax.ws.rs.PathParam;
  */
 public interface OrderApiService {
     String queryOrderById(Long id);
-    String queryOrder();
+    String getOrderId(String bizName) throws InterruptedException;
+    void deleteOrder(Long id);
 }

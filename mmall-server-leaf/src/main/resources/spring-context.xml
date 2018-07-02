@@ -6,7 +6,7 @@
 
     <description>Spring Configuration</description>
 
-    <context:property-placeholder ignore-unresolvable="true" location="classpath:order.properties" />
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:leaf.properties" />
 
     <context:component-scan base-package="com.arunqi.mmall" />
 
@@ -61,10 +61,6 @@
         <constructor-arg index="0" ref="dataSource" />
     </bean>
 
-    <!--<bean id="commaStringArrayList" class="com.arunqi.mmall.common.util.CommaStringArrayList">-->
-        <!--<constructor-arg name="commaString" value="${redis.cluster.nodes}" />-->
-    <!--</bean>-->
-
     <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
         <property name="maxTotal" value="${redis.maxTotal}"/>
         <property name="maxIdle" value="${redis.maxIdle}"/>
@@ -73,31 +69,11 @@
         <property name="testOnBorrow" value="${redis.testOnBorrow}"/>
     </bean>
 
-    <!--<bean id="redisClusterConfiguration" class="org.springframework.data.redis.connection.RedisClusterConfiguration">-->
-       <!--&lt;!&ndash;<constructor-arg name="clusterNodes" ref="commaStringArrayList"></constructor-arg>&ndash;&gt;-->
-        <!--<property name="clusterNodes">-->
-            <!--<set>-->
-                <!--<bean class="org.springframework.data.redis.connection.RedisClusterNode">-->
-                    <!--<constructor-arg name="host" value="127.0.0.1"/>-->
-                    <!--<constructor-arg name="port" value="6379"/>-->
-                <!--</bean>-->
-                <!--<bean class="org.springframework.data.redis.connection.RedisClusterNode">-->
-                    <!--<constructor-arg name="host" value="127.0.0.1"/>-->
-                    <!--<constructor-arg name="port" value="6380"/>-->
-                <!--</bean>-->
-            <!--</set>-->
-        <!--</property>-->
-        <!--<property name="maxRedirects" value="${redis.cluster.maxRedirects}"/>-->
-    <!--</bean>-->
-
     <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
-        <!--<constructor-arg name="clusterConfig" ref="redisClusterConfiguration"/>-->
         <constructor-arg name="poolConfig" ref="jedisPoolConfig" />
         <property name="hostName" value="${redis.hostname}"/>
         <property name="port" value="${redis.port}" />
     </bean>
-
-
 
     <bean id="stringSerializer" class="org.springframework.data.redis.serializer.StringRedisSerializer" />
 
@@ -108,12 +84,6 @@
 
     <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
         <property name="connectionFactory" ref="jedisConnectionFactory" />
-    </bean>
-
-    <bean id="orderIdUtil" class="com.arunqi.mmall.server.base.common.IdRedisUtil">
-        <constructor-arg name="stringRedisTemplate" ref="stringRedisTemplate"/>
-        <constructor-arg name="workId" value="0" />
-        <constructor-arg name="key" value="mmall:order:id:"/>
     </bean>
 
     <import resource="classpath:dubbo.xml" />

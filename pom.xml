@@ -30,6 +30,9 @@
         <module>mmall-facade-order</module>
         <module>mmall-facade-base</module>
         <module>mmall-server-openapi</module>
+        <module>mmall-server-id</module>
+        <module>mmall-server-leaf</module>
+        <module>mmall-facade-leaf</module>
     </modules>
 
 </project>

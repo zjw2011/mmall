@@ -19,8 +19,9 @@ import org.springframework.stereotype.Service;
  * @author jiawei zhang
  * @datetime 2018/6/24 上午9:44
  */
-@Path("/")
+@Path("/orders")
 @Service("orderApiService")
+@Produces({MediaType.APPLICATION_JSON})
 public class OrderApiServiceImpl implements OrderApiService {
 
     @Resource
@@ -32,8 +33,7 @@ public class OrderApiServiceImpl implements OrderApiService {
      * @return 
      */
     @GET
-    @Path("/orders/{id : \\d+}")
-    @Produces({MediaType.APPLICATION_JSON})
+    @Path("/{id : \\d+}")
     public String queryOrderById(@PathParam("id") Long id) {
         DubboRequest dubboRequest = new DubboRequest();
         DubboResponse dubboResponse = orderService.doOrder(dubboRequest);
@@ -51,11 +51,20 @@ public class OrderApiServiceImpl implements OrderApiService {
      * @return
      */
     @GET
-    @Path("/orders")
-    @Produces({MediaType.APPLICATION_JSON})
-    public String queryOrder() {
-        return "aaa";
+    @Path("/id/{bizName}")
+    public String getOrderId(@PathParam("bizName") String bizName) throws InterruptedException {
+        return orderService.getOrderId(bizName);
     }
 
+
+    /**
+     * 查询订单.
+     * @return
+     */
+    @GET
+    @Path("/delete/{id : \\d+}")
+    public void deleteOrder(@PathParam("id") Long id) {
+        orderService.deleteOrder(id);
+    }
 
 }
