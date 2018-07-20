@@ -5,6 +5,7 @@ import com.arunqi.mmall.common.model.DubboRequest;
 import com.arunqi.mmall.common.model.DubboResponse;
 import com.arunqi.mmall.facade.leaf.service.LeafService;
 import com.arunqi.mmall.facade.order.service.OrderService;
+import com.arunqi.mmall.server.base.common.IdRedisUtil;
 import com.arunqi.mmall.server.base.dao.Page;
 import com.arunqi.mmall.server.base.service.CommonServiceImpl;
 import com.arunqi.mmall.server.order.dao.OrderRecordDao;
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -39,6 +41,9 @@ public class OrderServiceImpl extends CommonServiceImpl implements OrderService 
 
     @Resource
     private LeafService leafService;
+
+    @Resource
+    private IdRedisUtil orderIdUtil;
 
 
     @Override
@@ -72,7 +77,11 @@ public class OrderServiceImpl extends CommonServiceImpl implements OrderService 
 
         final JSONObject jsonObject2 = new JSONObject();
         final JSONObject condition = new JSONObject();
-        condition.put("id", 1);
+        final Long id = orderIdUtil.createLongId(0);
+        if (id == null) {
+            return null;
+        }
+        condition.put("id", id);
         jsonObject.put("rowversion", 2);
         jsonObject.put("order_status", 1);
         int result = orderDao.update(jsonObject, condition);

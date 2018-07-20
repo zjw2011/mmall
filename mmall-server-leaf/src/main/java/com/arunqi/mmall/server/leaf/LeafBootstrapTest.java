@@ -46,7 +46,7 @@ public class LeafBootstrapTest {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    for (int j = 0; j< 1;j++) {
+                    for (int j = 0; j< 1000;j++) {
                         final Long id = redisIdUtil.createLongId(0);
                         final String sql = "insert into test_id (id) values(?)";
                         jdbcTemplate.update(sql, id);

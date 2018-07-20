@@ -23,5 +23,15 @@ public class HelloApplication {
         logger.warn("warn");
         logger.error("error");
         //TimeUnit.SECONDS.sleep(20);
+
+        long a = (1L << 2) | (1L << 4) | (1L << 60);
+        for (int i = 0; i < 62; i++) {
+            if (((1L << i) & a) == 0) {
+                continue;
+            }
+            System.out.println("i:" + i);
+        }
+
+
     }
 }
